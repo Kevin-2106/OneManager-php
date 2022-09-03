@@ -400,88 +400,6 @@
   <!--FootomfContent-->
 </div>
 <!--FootomfEnd-->
-
-<script>
-  document.querySelector("#admin-menu").innerHTML +=
-    '<li class="mdui-menu-item"><a href="javascript:void(0);"class="mdui-ripple getalllink"><i class="mdui-menu-item-icon mdui-icon material-icons">link</i>批量链接</a></li>';
-</script>
-<script>
-  window.MorePage = undefined;
-</script>
-<!--MorePageStart-->
-<script>
-    window.MorePage = [
-    <!--MorePageListNowStart-->
-      <!--PageNum-->,
-    <!--MorePageListNowEnd-->
-    <!--MorePageListStart-->
-        <!--PageNum-->,
-    <!--MorePageListEnd-->
-    ];
-  </script>
-<!--MorePageEnd-->
-
-<!--IsFolderEnd-->
- <!--IsFileStart-->
-<div
-  id="file"
-  class="mdui-shadow-3"
-  style="padding: 5px; margin: 20px 0px; padding: 20px; border-radius: 8px"
->
-  <!--IsimgFileStart-->
-<img class="mdui-img-fluid mdui-center mdui-m-t-5" src="<!--FileDownUrl-->" />
-<!--IsimgFileEnd-->
- <!--IsmusicFileStart-->
-<audio
-  class="mdui-center"
-  src="<!--FileDownUrl-->"
-  controls
-  autoplay
-  style="width: 100%; margin-top: 10%; margin-bottom: 10%"
-></audio>
-<!--IsmusicFileEnd-->
-
-  <!--IsvideoFileStart-->
-<video
-  class="mdui-video-fluid"
-  controls
-  style="margin-top: 20px; margin-bottom: 20px"
->
-  <source src="<!--FileDownUrl-->" />
-  <p>
-    Your browser doesn't support HTML5 video. Here is a
-    <a href="<!--FileDownUrl-->">link to the video</a> instead.
-  </p>
-</video>
-<!--IsvideoFileEnd-->
- <!--IsofficeFileStart-->
-<iframe
-  id="office-a"
-  src="https://view.officeapps.live.com/op/view.aspx?src=<!--FileEncodeDownUrl-->"
-  style="width: 100%; height: 800px"
-  frameborder="0"
-></iframe>
-<!--IsofficeFileEnd-->
-
-  <!--IspdfFileStart-->
-<embed src="<!--FileEncodeReplaceUrl-->" type="application/pdf" />
-<!--IspdfFileEnd-->
- <!--IstxtFileStart-->
-<pre
-  id="editor"
-  style="
-    white-space: pre-wrap;
-    font-family: JetBrains Mono, Fira Code, Sarasa Mono SC, Cascadia Code, Menlo,
-      Consolas, monaco, Noto Sans SC;
-  "
-><code id="code"><!--TxtContent--></code></pre>
-<script>
-  document.querySelector("#admin-menu").innerHTML +=
-    '<li class="mdui-menu-item"><a href="javascript:void(0);"class="mdui-ripple highlight"><i class="mdui-menu-item-icon mdui-icon material-icons">style</i>markdown解析</a></li>';
-  document.querySelector(
-    ".mdui-toolbar"
-  ).innerHTML += `<a href="javascript:;" class="mdui-btn mdui-btn-icon mdui-ripple mdui-hidden-sm-up highlight"><i class="mdui-icon material-icons">style</i></a>`;
-</script>
 <script>
   function clickEffect() {
     let balls = [];
@@ -619,6 +537,88 @@
   }
   clickEffect();//调用特效函数
 </script>
+<script>
+  document.querySelector("#admin-menu").innerHTML +=
+    '<li class="mdui-menu-item"><a href="javascript:void(0);"class="mdui-ripple getalllink"><i class="mdui-menu-item-icon mdui-icon material-icons">link</i>批量链接</a></li>';
+</script>
+<script>
+  window.MorePage = undefined;
+</script>
+<!--MorePageStart-->
+<script>
+    window.MorePage = [
+    <!--MorePageListNowStart-->
+      <!--PageNum-->,
+    <!--MorePageListNowEnd-->
+    <!--MorePageListStart-->
+        <!--PageNum-->,
+    <!--MorePageListEnd-->
+    ];
+  </script>
+<!--MorePageEnd-->
+
+<!--IsFolderEnd-->
+ <!--IsFileStart-->
+<div
+  id="file"
+  class="mdui-shadow-3"
+  style="padding: 5px; margin: 20px 0px; padding: 20px; border-radius: 8px"
+>
+  <!--IsimgFileStart-->
+<img class="mdui-img-fluid mdui-center mdui-m-t-5" src="<!--FileDownUrl-->" />
+<!--IsimgFileEnd-->
+ <!--IsmusicFileStart-->
+<audio
+  class="mdui-center"
+  src="<!--FileDownUrl-->"
+  controls
+  autoplay
+  style="width: 100%; margin-top: 10%; margin-bottom: 10%"
+></audio>
+<!--IsmusicFileEnd-->
+
+  <!--IsvideoFileStart-->
+<video
+  class="mdui-video-fluid"
+  controls
+  style="margin-top: 20px; margin-bottom: 20px"
+>
+  <source src="<!--FileDownUrl-->" />
+  <p>
+    Your browser doesn't support HTML5 video. Here is a
+    <a href="<!--FileDownUrl-->">link to the video</a> instead.
+  </p>
+</video>
+<!--IsvideoFileEnd-->
+ <!--IsofficeFileStart-->
+<iframe
+  id="office-a"
+  src="https://view.officeapps.live.com/op/view.aspx?src=<!--FileEncodeDownUrl-->"
+  style="width: 100%; height: 800px"
+  frameborder="0"
+></iframe>
+<!--IsofficeFileEnd-->
+
+  <!--IspdfFileStart-->
+<embed src="<!--FileEncodeReplaceUrl-->" type="application/pdf" />
+<!--IspdfFileEnd-->
+ <!--IstxtFileStart-->
+<pre
+  id="editor"
+  style="
+    white-space: pre-wrap;
+    font-family: JetBrains Mono, Fira Code, Sarasa Mono SC, Cascadia Code, Menlo,
+      Consolas, monaco, Noto Sans SC;
+  "
+><code id="code"><!--TxtContent--></code></pre>
+<script>
+  document.querySelector("#admin-menu").innerHTML +=
+    '<li class="mdui-menu-item"><a href="javascript:void(0);"class="mdui-ripple highlight"><i class="mdui-menu-item-icon mdui-icon material-icons">style</i>markdown解析</a></li>';
+  document.querySelector(
+    ".mdui-toolbar"
+  ).innerHTML += `<a href="javascript:;" class="mdui-btn mdui-btn-icon mdui-ripple mdui-hidden-sm-up highlight"><i class="mdui-icon material-icons">style</i></a>`;
+</script>
+
 
 <!--IstxtFileEnd-->
 
