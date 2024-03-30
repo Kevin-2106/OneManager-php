@@ -1,16 +1,17 @@
 <?php
 // https://vercel.com/docs/api#endpoints/deployments/create-a-new-deployment
+// https://github.com/vercel-community/php
 
 function getpath() {
     $_SERVER['firstacceptlanguage'] = strtolower(splitfirst(splitfirst($_SERVER['HTTP_ACCEPT_LANGUAGE'], ';')[0], ',')[0]);
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
     if (isset($_SERVER['HTTP_FLY_CLIENT_IP'])) $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_FLY_CLIENT_IP'];
-    if ($_SERVER['REQUEST_SCHEME'] != 'http' && $_SERVER['REQUEST_SCHEME'] != 'https') {
+    if (!isset($_SERVER['REQUEST_SCHEME']) || $_SERVER['REQUEST_SCHEME'] != 'http' && $_SERVER['REQUEST_SCHEME'] != 'https') {
         if ($_SERVER['HTTP_X_FORWARDED_PROTO'] != '') {
             $tmp = explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0];
             if ($tmp == 'http' || $tmp == 'https') $_SERVER['REQUEST_SCHEME'] = $tmp;
         }
-        if ($_SERVER['HTTP_FLY_FORWARDED_PROTO'] != '') $_SERVER['REQUEST_SCHEME'] = $_SERVER['HTTP_FLY_FORWARDED_PROTO'];
+        if (isset($_SERVER['HTTP_FLY_FORWARDED_PROTO'])) $_SERVER['REQUEST_SCHEME'] = $_SERVER['HTTP_FLY_FORWARDED_PROTO'];
     }
     $_SERVER['host'] = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'];
     $_SERVER['referhost'] = explode('/', $_SERVER['HTTP_REFERER'])[2];
@@ -45,13 +46,9 @@ function getGET() {
         $getstrarr = explode("&", $getstr);
         foreach ($getstrarr as $getvalues) {
             if ($getvalues != '') {
-                $pos = strpos($getvalues, "=");
-                //echo $pos;
-                if ($pos > 0) {
-                    $getarry[urldecode(substr($getvalues, 0, $pos))] = urldecode(substr($getvalues, $pos + 1));
-                } else {
-                    $getarry[urldecode($getvalues)] = true;
-                }
+                $keyvalue = splitfirst($getvalues, "=");
+                if ($keyvalue[1] != "") $getarry[$keyvalue[0]] = $keyvalue[1];
+                else $getarry[$keyvalue[0]] = true;
             }
         }
     }
@@ -305,20 +302,42 @@ function setVercelConfig($envs, $appId, $token) {
     return VercelUpdate($appId, $token, $outPath);
 }
 
+function fetchVercelPHPVersion() {
+    $runtime = json_decode(file_get_contents("../../vercel.json"), true)['functions']['api/index.php']['runtime'];
+    $vercelPHPversion = splitlast($runtime, '@')[1];
+    if (!($vercelPHPversion = getcache("VercelPHPRuntime"))) {
+        $url = "https://raw.githubusercontent.com/vercel-community/php/master/package.json";
+        $response = curl("GET", $url);
+        if ($response['stat'] == 200) {
+            $res = json_decode($response['body'], true)['version'];
+            if ($res) {
+                savecache("VercelPHPRuntime", $res);
+                $vercelPHPversion = $res;
+            }
+        }
+    }
+    return $vercelPHPversion;
+}
+
 function VercelUpdate($appId, $token, $sourcePath = "") {
     if (checkBuilding($appId, $token)) return '{"error":{"message":"Another building is in progress."}}';
+    $vercelPHPversion = fetchVercelPHPVersion();
     $url = "https://api.vercel.com/v13/deployments";
     $header["Authorization"] = "Bearer " . $token;
     $header["Content-Type"] = "application/json";
+    $data["functions"]["api/index.php"]["runtime"] = "vercel-php@" . $vercelPHPversion;
+    $data["routes"][0]["src"] = "/(.*)";
+    $data["routes"][0]["dest"] = "/api/index.php";
+    $verceljson = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     $data["name"] = "OneManager";
     $data["project"] = $appId;
     $data["target"] = "production";
-    $data["routes"][0]["src"] = "/(.*)";
-    $data["routes"][0]["dest"] = "/api/index.php";
-    $data["functions"]["api/index.php"]["runtime"] = "vercel-php@0.6.0";
     if ($sourcePath == "") $sourcePath = splitlast(splitlast(__DIR__, "/")[0], "/")[0];
     //echo $sourcePath . "<br>";
     getEachFiles($file, $sourcePath);
+    $tmp['file'] = "vercel.json";
+    $tmp['data'] = $verceljson;
+    $file[] = $tmp;
     $data["files"] = $file;
 
     //echo json_encode($data, JSON_PRETTY_PRINT) . " ,data<br>";
@@ -357,7 +376,7 @@ function getEachFiles(&$file, $base, $path = "") {
                 $response = getEachFiles($file, $base, path_format($path . "/" . $filename));
                 if (api_error(setConfigResponse($response))) return $response;
             } else {
-                $tmp['file'] = path_format($path . "/" . $filename);
+                $tmp['file'] = substr(path_format($path . "/" . $filename), 1);
                 $tmp['data'] = file_get_contents($fromfile);
                 $file[] = $tmp;
             }
@@ -386,14 +405,20 @@ function OnekeyUpate($GitSource = 'Github', $auth = 'qkqpttgf', $project = 'OneM
     $tmppath = '/tmp';
 
     if ($GitSource == 'Github') {
-        // 从github下载对应tar.gz，并解压
-        $url = 'https://github.com/' . $auth . '/' . $project . '/tarball/' . urlencode($branch) . '/';
-    } elseif ($GitSource == 'HITGitlab') {
-        $url = 'https://git.hit.edu.cn/' . $auth . '/' . $project . '/-/archive/' . urlencode($branch) . '/' . $project . '-' . urlencode($branch) . '.tar.gz';
+        // 从github下载对应zip，并解压
+        $url = 'https://codeload.github.com/' . $auth . '/' . $project . '/zip/refs/heads/' . urlencode($branch);
+    } elseif ($GitSource == 'Gitee') {
+        $url = 'https://gitee.com/' . $auth . '/' . $project . '/repository/archive/' . urlencode($branch) . '.zip';
     } else return json_encode(['error' => ['code' => 'Git Source input Error!']]);
 
-    $tarfile = $tmppath . '/github.tar.gz';
-    file_put_contents($tarfile, file_get_contents($url));
+    $tarfile = $tmppath . '/github.zip';
+    $context_options = array(
+        'http' => array(
+            'header' => "User-Agent: curl/7.83.1",
+        )
+    );
+    $context = stream_context_create($context_options);
+    file_put_contents($tarfile, file_get_contents($url, false, $context));
     $phar = new PharData($tarfile);
     $html = $phar->extractTo($tmppath, null, true); //路径 要解压的文件 是否覆盖
     unlink($tarfile);
@@ -420,7 +445,7 @@ function OnekeyUpate($GitSource = 'Github', $auth = 'qkqpttgf', $project = 'OneM
 function WaitFunction($deployid = '') {
     if ($deployid == '1') {
         $tmp['stat'] = 400;
-        $tmp['body'] = 'id must provided.';
+        $tmp['body'] = 'deployID must provided.';
         return $tmp;
     }
     $token = getConfig('APIKey');
